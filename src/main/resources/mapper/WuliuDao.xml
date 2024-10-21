@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.WuliuDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.huoyun_id as huoyunId
+        ,a.yuangong_id as yuangongId
+        ,a.wuliu_uuid_number as wuliuUuidNumber
+        ,a.wuliu_name as wuliuName
+        ,a.wuliu_types as wuliuTypes
+        ,a.cangku_types as cangkuTypes
+        ,a.wuliu_content as wuliuContent
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.WuliuView" >
+        SELECT
+        <include refid="Base_Column_List" />
+        <!-- 级联表的字段 -->
+        ,huoyun.yonghu_id as huoyunYonghuId
+        ,huoyun.yuangong_id as huoyunYuangongId
+        ,huoyun.huoyun_uuid_number as huoyunUuidNumber
+        ,huoyun.huoyun_name as huoyunName
+        ,huoyun.huoyun_photo as huoyunPhoto
+        ,huoyun.huoyun_chufa_address as huoyunChufaAddress
+        ,huoyun.huoyun_chufa_lianxiren as huoyunChufaLianxiren
+        ,huoyun.huoyun_chufa_dianhua as huoyunChufaDianhua
+        ,huoyun.huoyun_songda_address as huoyunSongdaAddress
+        ,huoyun.huoyun_songda_lianxiren as huoyunSongdaLianxiren
+        ,huoyun.huoyun_songda_dianhua as huoyunSongdaDianhua
+        ,huoyun.huoyun_types as huoyunTypes
+        ,huoyun.huoyun_number as huoyunNumber
+        ,huoyun.huoyun_dan_changkuangao as huoyunDanChangkuangao
+        ,huoyun.huoyun_zong_changkuangao as huoyunZongChangkuangao
+        ,huoyun.huoyun_zhongliang as huoyunZhongliang
+        ,huoyun.huoyun_content as huoyunContent
+        ,huoyun.huoyun_yesno_types as huoyunYesnoTypes
+        ,huoyun.huoyun_yesno_text as huoyunYesnoText
+        ,huoyun.huoyun_shenhe_time as huoyunShenheTime
+        ,huoyun.huoyun_jine as huoyunJine
+        ,huoyun.huoyun_zhifu_types as huoyunZhifuTypes
+        ,yuangong.yuangong_uuid_number as yuangongUuidNumber
+        ,yuangong.yuangong_name as yuangongName
+        ,yuangong.yuangong_phone as yuangongPhone
+        ,yuangong.yuangong_id_number as yuangongIdNumber
+        ,yuangong.yuangong_photo as yuangongPhoto
+        ,yuangong.yuangong_email as yuangongEmail
+        ,yuangong.jinyong_types as jinyongTypes
+
+        FROM wuliu  a
+        left JOIN huoyun huoyun ON a.huoyun_id = huoyun.id
+        left JOIN yuangong yuangong ON a.yuangong_id = yuangong.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.huoyunId != null and params.huoyunId != ''">
+                and (
+                    a.huoyun_id = #{params.huoyunId}
+                )
+            </if>
+            <if test="params.yuangongId != null and params.yuangongId != ''">
+                and (
+                    a.yuangong_id = #{params.yuangongId}
+                    or huoyun.yuangong_id = #{params.yuangongId}
+                )
+            </if>
+            <if test=" params.wuliuUuidNumber != '' and params.wuliuUuidNumber != null and params.wuliuUuidNumber != 'null' ">
+                and a.wuliu_uuid_number like CONCAT('%',#{params.wuliuUuidNumber},'%')
+            </if>
+            <if test=" params.wuliuName != '' and params.wuliuName != null and params.wuliuName != 'null' ">
+                and a.wuliu_name like CONCAT('%',#{params.wuliuName},'%')
+            </if>
+            <if test="params.wuliuTypes != null and params.wuliuTypes != ''">
+                and a.wuliu_types = #{params.wuliuTypes}
+            </if>
+            <if test="params.cangkuTypes != null and params.cangkuTypes != ''">
+                and a.cangku_types = #{params.cangkuTypes}
+            </if>
+            <if test=" params.wuliuContent != '' and params.wuliuContent != null and params.wuliuContent != 'null' ">
+                and a.wuliu_content like CONCAT('%',#{params.wuliuContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+
+                <!-- 判断货运单的id不为空 -->
+            <if test=" params.huoyunIdNotNull != '' and params.huoyunIdNotNull != null and params.huoyunIdNotNull != 'null' ">
+                and a.huoyun_id IS NOT NULL
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and huoyun.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.huoyunUuidNumber != '' and params.huoyunUuidNumber != null and params.huoyunUuidNumber != 'null' ">
+                and huoyun.huoyun_uuid_number like CONCAT('%',#{params.huoyunUuidNumber},'%')
+            </if>
+            <if test=" params.huoyunName != '' and params.huoyunName != null and params.huoyunName != 'null' ">
+                and huoyun.huoyun_name like CONCAT('%',#{params.huoyunName},'%')
+            </if>
+            <if test=" params.huoyunChufaAddress != '' and params.huoyunChufaAddress != null and params.huoyunChufaAddress != 'null' ">
+                and huoyun.huoyun_chufa_address like CONCAT('%',#{params.huoyunChufaAddress},'%')
+            </if>
+            <if test=" params.huoyunChufaLianxiren != '' and params.huoyunChufaLianxiren != null and params.huoyunChufaLianxiren != 'null' ">
+                and huoyun.huoyun_chufa_lianxiren like CONCAT('%',#{params.huoyunChufaLianxiren},'%')
+            </if>
+            <if test=" params.huoyunChufaDianhua != '' and params.huoyunChufaDianhua != null and params.huoyunChufaDianhua != 'null' ">
+                and huoyun.huoyun_chufa_dianhua like CONCAT('%',#{params.huoyunChufaDianhua},'%')
+            </if>
+            <if test=" params.huoyunSongdaAddress != '' and params.huoyunSongdaAddress != null and params.huoyunSongdaAddress != 'null' ">
+                and huoyun.huoyun_songda_address like CONCAT('%',#{params.huoyunSongdaAddress},'%')
+            </if>
+            <if test=" params.huoyunSongdaLianxiren != '' and params.huoyunSongdaLianxiren != null and params.huoyunSongdaLianxiren != 'null' ">
+                and huoyun.huoyun_songda_lianxiren like CONCAT('%',#{params.huoyunSongdaLianxiren},'%')
+            </if>
+            <if test=" params.huoyunSongdaDianhua != '' and params.huoyunSongdaDianhua != null and params.huoyunSongdaDianhua != 'null' ">
+                and huoyun.huoyun_songda_dianhua like CONCAT('%',#{params.huoyunSongdaDianhua},'%')
+            </if>
+            <if test="params.huoyunTypes != null  and params.huoyunTypes != ''">
+                and huoyun.huoyun_types = #{params.huoyunTypes}
+            </if>
+
+            <if test="params.huoyunNumberStart != null  and params.huoyunNumberStart != '' ">
+                <![CDATA[  and huoyun.huoyun_number >= #{params.huoyunNumberStart}   ]]>
+            </if>
+            <if test="params.huoyunNumberEnd != null  and params.huoyunNumberEnd != '' ">
+                <![CDATA[  and huoyun.huoyun_number <= #{params.huoyunNumberEnd}   ]]>
+            </if>
+            <if test="params.huoyunNumber != null  and params.huoyunNumber != '' ">
+                and huoyun.huoyun_number = #{params.huoyunNumber}
+            </if>
+            <if test=" params.huoyunDanChangkuangao != '' and params.huoyunDanChangkuangao != null and params.huoyunDanChangkuangao != 'null' ">
+                and huoyun.huoyun_dan_changkuangao like CONCAT('%',#{params.huoyunDanChangkuangao},'%')
+            </if>
+            <if test=" params.huoyunZongChangkuangao != '' and params.huoyunZongChangkuangao != null and params.huoyunZongChangkuangao != 'null' ">
+                and huoyun.huoyun_zong_changkuangao like CONCAT('%',#{params.huoyunZongChangkuangao},'%')
+            </if>
+            <if test="params.huoyunZhongliangStart != null ">
+                <![CDATA[  and huoyun.huoyun_zhongliang >= #{params.huoyunZhongliangStart}   ]]>
+            </if>
+            <if test="params.huoyunZhongliangEnd != null ">
+                <![CDATA[  and huoyun.huoyun_zhongliang <= #{params.huoyunZhongliangEnd}   ]]>
+            </if>
+            <if test="params.huoyunZhongliang != null and params.huoyunZhongliang != ''">
+                and a.huoyun_zhongliang = #{params.huoyunZhongliang}
+            </if>
+            <if test=" params.huoyunContent != '' and params.huoyunContent != null and params.huoyunContent != 'null' ">
+                and huoyun.huoyun_content like CONCAT('%',#{params.huoyunContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huoyun.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huoyun.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+            <if test="params.insertTime != null and params.insertTime != ''">
+                and a.insert_time = #{params.insertTime}
+            </if>
+            <if test="params.huoyunYesnoTypes != null  and params.huoyunYesnoTypes != ''">
+                and huoyun.huoyun_yesno_types = #{params.huoyunYesnoTypes}
+            </if>
+
+            <if test=" params.huoyunYesnoText != '' and params.huoyunYesnoText != null and params.huoyunYesnoText != 'null' ">
+                and huoyun.huoyun_yesno_text like CONCAT('%',#{params.huoyunYesnoText},'%')
+            </if>
+            <if test=" params.huoyunShenheTimeStart != '' and params.huoyunShenheTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huoyun.huoyun_shenhe_time) >= UNIX_TIMESTAMP(#{params.huoyunShenheTimeStart}) ]]>
+            </if>
+            <if test=" params.huoyunShenheTimeEnd != '' and params.huoyunShenheTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(huoyun.huoyun_shenhe_time) <= UNIX_TIMESTAMP(#{params.huoyunShenheTimeEnd}) ]]>
+            </if>
+            <if test="params.huoyunShenheTime != null and params.huoyunShenheTime != ''">
+                and a.huoyun_shenhe_time = #{params.huoyunShenheTime}
+            </if>
+            <if test="params.huoyunJineStart != null ">
+                <![CDATA[  and huoyun.huoyun_jine >= #{params.huoyunJineStart}   ]]>
+            </if>
+            <if test="params.huoyunJineEnd != null ">
+                <![CDATA[  and huoyun.huoyun_jine <= #{params.huoyunJineEnd}   ]]>
+            </if>
+            <if test="params.huoyunJine != null and params.huoyunJine != ''">
+                and a.huoyun_jine = #{params.huoyunJine}
+            </if>
+            <if test="params.huoyunZhifuTypes != null  and params.huoyunZhifuTypes != ''">
+                and huoyun.huoyun_zhifu_types = #{params.huoyunZhifuTypes}
+            </if>
+
+                <!-- 判断员工的id不为空 -->
+            <if test=" params.yuangongIdNotNull != '' and params.yuangongIdNotNull != null and params.yuangongIdNotNull != 'null' ">
+                and a.yuangong_id IS NOT NULL
+            </if>
+            <if test=" params.yuangongUuidNumber != '' and params.yuangongUuidNumber != null and params.yuangongUuidNumber != 'null' ">
+                and yuangong.yuangong_uuid_number like CONCAT('%',#{params.yuangongUuidNumber},'%')
+            </if>
+            <if test=" params.yuangongName != '' and params.yuangongName != null and params.yuangongName != 'null' ">
+                and yuangong.yuangong_name like CONCAT('%',#{params.yuangongName},'%')
+            </if>
+            <if test=" params.yuangongPhone != '' and params.yuangongPhone != null and params.yuangongPhone != 'null' ">
+                and yuangong.yuangong_phone like CONCAT('%',#{params.yuangongPhone},'%')
+            </if>
+            <if test=" params.yuangongIdNumber != '' and params.yuangongIdNumber != null and params.yuangongIdNumber != 'null' ">
+                and yuangong.yuangong_id_number like CONCAT('%',#{params.yuangongIdNumber},'%')
+            </if>
+            <if test=" params.yuangongEmail != '' and params.yuangongEmail != null and params.yuangongEmail != 'null' ">
+                and yuangong.yuangong_email like CONCAT('%',#{params.yuangongEmail},'%')
+            </if>
+            <if test="params.jinyongTypes != null  and params.jinyongTypes != ''">
+                and yuangong.jinyong_types = #{params.jinyongTypes}
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
